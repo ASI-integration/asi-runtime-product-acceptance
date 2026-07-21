@@ -1,0 +1,15 @@
+const categories = ["Сантехника", "Электрика", "Уборка", "Мебель", "Другое"];
+const priorities = ["Низкий", "Средний", "Высокий", "Срочный"];
+const statuses = ["Новая", "В работе", "Выполнена"];
+const $ = (selector) => document.querySelector(selector); const form = $("#form"); const dialog = $("#dialog"); let records = [];
+function options(select, values) { select.insertAdjacentHTML("beforeend", values.map((x) => `<option>${x}</option>`).join("")); }
+options(form.category, categories); options(form.priority, priorities); options(form.status, statuses); options($("#filter-priority"), priorities); options($("#filter-status"), statuses);
+const escape = (value) => String(value).replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[c]);
+async function load() { const query = new URLSearchParams(); for (const key of ["property", "priority", "status"]) { const value = $(`#filter-${key}`).value.trim(); if (value) query.set(key, value); } const res = await fetch(`/api/requests?${query}`); records = await res.json(); render(); }
+function render() { $("#requests").innerHTML = records.length ? records.map((r) => `<article><div class="card-top"><span class="category">${escape(r.category)}</span><span class="priority p-${priorities.indexOf(r.priority)}">${escape(r.priority)}</span></div><h3>${escape(r.property)} · ${escape(r.room)}</h3><p>${escape(r.description)}</p><footer><span class="status">${escape(r.status)}</span><button class="link" data-edit="${r.id}">Изменить</button></footer></article>`).join("") : `<div class="empty"><b>Заявок не найдено</b><span>Создайте первую заявку или измените фильтры.</span></div>`; }
+function open(record) { form.reset(); $("#form-error").textContent = ""; $("#form-title").textContent = record ? "Редактирование заявки" : "Новая заявка"; if (record) for (const [key, value] of Object.entries(record)) if (form.elements[key]) form.elements[key].value = value; dialog.showModal(); }
+$("#new").onclick = () => open(); $("#close").onclick = () => dialog.close(); $("#clear").onclick = () => { $("#filter-property").value = $("#filter-priority").value = $("#filter-status").value = ""; load(); };
+for (const id of ["#filter-property", "#filter-priority", "#filter-status"]) $(id).addEventListener(id.includes("property") ? "input" : "change", load);
+$("#requests").onclick = (event) => { const id = event.target.dataset.edit; if (id) open(records.find((r) => r.id === id)); };
+form.onsubmit = async (event) => { event.preventDefault(); const input = Object.fromEntries(new FormData(form)); const id = input.id; delete input.id; const res = await fetch(id ? `/api/requests/${id}` : "/api/requests", { method: id ? "PATCH" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(input) }); const data = await res.json(); if (!res.ok) return $("#form-error").textContent = (data.errors || [data.error]).join(". "); dialog.close(); await load(); };
+load().catch(() => $("#message").textContent = "Не удалось загрузить заявки");

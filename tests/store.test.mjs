@@ -1,0 +1,4 @@
+import test from "node:test"; import assert from "node:assert/strict"; import fs from "node:fs/promises"; import os from "node:os"; import path from "node:path";
+import { RequestStore } from "../src/store.mjs"; import { validateCreate } from "../src/validation.mjs";
+test("validation requires fields", () => assert.ok(validateCreate({}).length >= 5));
+test("store creates, updates and persists requests", async () => { const dir = await fs.mkdtemp(path.join(os.tmpdir(), "desk-")); const file = path.join(dir, "requests.json"); const store = new RequestStore(file); const created = await store.create({ property:"Север", room:"1", category:"Уборка", description:"Нужно убрать", priority:"Средний" }); await store.update(created.id, { status:"В работе" }); const restarted = new RequestStore(file); assert.equal((await restarted.list({ status:"В работе" }))[0].property, "Север"); await fs.rm(dir, { recursive:true, force:true }); });
