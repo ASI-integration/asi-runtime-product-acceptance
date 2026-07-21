@@ -1,2 +1,33 @@
-# asi-runtime-product-acceptance
-Clean product-generation acceptance test for ASI Runtime
+# ASI Mini Service Desk
+
+Локальное приложение для регистрации и обработки заявок на обслуживание объектов размещения. Данные сохраняются в `data/requests.json` и остаются доступными после перезапуска.
+
+Требуется Node.js 20 или новее. Зависимости устанавливать не нужно.
+
+## Запуск
+
+```sh
+npm start
+```
+
+Откройте `http://localhost:3000`.
+
+## Тестирование
+
+```sh
+npm test
+```
+
+## Сборка
+
+```sh
+npm run build
+```
+
+После сборки запустите готовое приложение:
+
+```sh
+node dist/src/server.mjs
+```
+
+Порт можно задать переменной `PORT`, а путь к файлу данных — переменной `DATA_FILE`.
