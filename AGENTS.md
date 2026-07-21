@@ -1,24 +1,26 @@
 # AGENTS.md
 
-## Scope
+## Repository purpose
 
-Review the Runtime Dashboard implementation from PR #5.
+This repository is a clean product-generation acceptance target for ASI Runtime.
 
-## Required work
+## Source of truth
 
-- Verify Runtime task, provider, attempt, steps, events, and final status rendering.
-- Verify empty, active, blocked, failed, and completed states.
-- Run focused checks:
-  - npm run test:dashboard
-  - npm run check
-- Make only minimal fixes for confirmed defects.
-- Add or update focused tests for any fix.
+The current ASI Runtime task envelope is the authoritative implementation request.
 
-## Restrictions
+## Protected baseline
 
-- Do not merge the pull request.
-- Do not deploy.
-- Do not modify production systems.
-- Do not access or modify secrets or .env files.
-- Do not perform unrelated refactoring.
-- Preserve the approved Dashboard UX unless correcting a confirmed defect.
+Do not modify:
+
+- tests/baseline.test.mjs
+- docs/agent-os/**
+- .agents/**
+- scripts/agent-os/**
+- lib/process-launch.mjs
+
+## Implementation rules
+
+- Work only on paths declared in the current task envelope.
+- Keep the application local and self-contained.
+- Do not perform unrelated changes.
+- Run npm test and npm run build before finishing.
